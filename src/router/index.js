@@ -1,16 +1,19 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
       name: 'home',
+      component: () => import('../views/SignUpPage.vue')
+    },
+		{
+      path: '/login',
       component: () => import('../views/LoginPage.vue')
     },
 		{
       path: '/todolist',
-      name: 'todolist',
       component: () => import('../views/TodoListPage.vue')
     },
   ]
