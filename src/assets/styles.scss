@@ -280,6 +280,11 @@ nav ul a span {
   font-size: 1rem;
 }
 
+.formControls .formControls_btnSubmit:disabled {
+  opacity: .8;
+	cursor: not-allowed;
+}
+
 .formControls a {
   text-decoration: none;
 }
