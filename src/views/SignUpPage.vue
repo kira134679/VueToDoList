@@ -6,6 +6,7 @@
 	import { useRouter } from 'vue-router';
 
 	const baseUrlStore = useBaseUrlStore();
+	const { baseUrl } = storeToRefs(baseUrlStore);
 	const router = useRouter();
 
 	const signUpField = ref(
@@ -18,8 +19,6 @@
 	);
 
 	const signUpErrorMsg = ref("");
-
-	const { baseUrl } = storeToRefs(baseUrlStore);
 
 	const isSignUpDisabled = computed(() => {
 		const { email, nickname, password } = signUpField.value;
@@ -42,14 +41,10 @@
 			 * 為了統一解法，先都加進陣列再用flat降為一維陣列，使join可正常運作。
 			 */
 			signUpErrorMsg.value = [error.response.data.message].flat();
-			console.log(signUpErrorMsg.value)
 			
-
-			const myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
-			myModal.show();
+			new bootstrap.Modal(document.getElementById('signUpErrorModal')).show();
 		}
 	}
-
 </script>
 
 <template>
@@ -82,11 +77,11 @@
 	</div>
 
 	<!-- Modal -->
-	<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal fade" id="signUpErrorModal" tabindex="-1" aria-labelledby="signUpErrorModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title fw-bold" id="exampleModalLabel">Oops!</h5>
+					<h5 class="modal-title fw-bold" id="signUpErrorModalLabel">Oops!</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
