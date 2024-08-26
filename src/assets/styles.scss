@@ -399,7 +399,7 @@ nav ul a span {
   padding-left: 16px;
 }
 
-.inputBox a {
+.inputBox button {
   display: block;
   width: 40px;
   height: 39px;
@@ -412,7 +412,7 @@ nav ul a span {
   border-radius: 10px;
   top: 4px;
   right: 4px;
-  padding: 10px;
+  // padding: 10px;
 }
 
 .todoList_list {
@@ -506,11 +506,13 @@ nav ul a span {
   display: block;
   font-size: 14px;
   color: #333333;
-  opacity: 0;
+  // opacity: 1;
+	padding-bottom: 15px;
 }
 
 .todoList_list .todoList_items li:hover a {
-  opacity: 1;
+	color: #ff0000;
+  // opacity: 1;
 }
 
 .todoList_list .todoList_statistics {

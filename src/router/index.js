@@ -6,11 +6,11 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('../views/SignUpPage.vue')
+      component: () => import('../views/LoginPage.vue')
     },
 		{
-      path: '/login',
-      component: () => import('../views/LoginPage.vue')
+      path: '/signup',
+      component: () => import('../views/SignUpPage.vue')
     },
 		{
       path: '/todolist',

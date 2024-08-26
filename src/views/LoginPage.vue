@@ -11,8 +11,8 @@
 
 	const loginField = ref(
 		{
-			email: "qq123@gmail.com",
-			password: "zxc12345"
+			email: "",
+			password: ""
 		}
 	);
 

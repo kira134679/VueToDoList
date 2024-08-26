@@ -31,7 +31,7 @@
 	const signUp = async () => {
 		try {
 			const res = await axios.post(`${baseUrl.value}/users/sign_up`, signUpField.value);
-			console.log(`登入成功! UID: ${res.data.uid}`);
+			console.log(`註冊成功! UID: ${res.data.uid}`);
 
 			router.push('/login');
 		} catch (error) {
