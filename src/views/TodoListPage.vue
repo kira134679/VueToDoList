@@ -236,6 +236,7 @@
 					</ul>
 					<div class="todoList_items">
 						<ul class="list-group list-group-flush">
+							<div class="text-center m-2" v-if="todosAll.length === 0">目前尚無待辦事項</div>
 							<li class="list-group-item" v-for="todo in todosAll" :key="todo.id">
 								<a id="saveBtn" v-if="todo.isEdit" @click="updateTodo(todo)">
 									<span class="material-symbols-outlined">check</span>
