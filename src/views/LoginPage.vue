@@ -62,9 +62,9 @@
 					<span v-if="loginField.email === ''">此欄位不可留空</span>
 					<label class="formControls_label" for="pwd">密碼</label>
 					<input class="formControls_input" type="password" name="pwd" id="pwd" placeholder="請輸入密碼" required v-model="loginField.password">
-					<span v-if="loginField.email === ''">此欄位不可留空</span>
+					<span v-if="loginField.password === ''">此欄位不可留空</span>
 					<input class="formControls_btnSubmit" type="button" @click="login" value="登入" :disabled="isLoginDisabled">
-					<RouterLink to="/" class="formControls_btnLink">註冊帳號</RouterLink>
+					<RouterLink to="/signup" class="formControls_btnLink">註冊帳號</RouterLink>
 				</form>
 			</div>
 		</div>

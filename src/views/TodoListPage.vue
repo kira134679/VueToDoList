@@ -1,5 +1,5 @@
 <script setup>
-	import { ref, onMounted } from 'vue'
+	import { ref, onMounted, computed } from 'vue'
 	import { useBaseUrlStore } from '@/stores/api'
 	import { useTodosStore } from '@/stores/todos'
 	import { storeToRefs } from 'pinia'
@@ -33,7 +33,7 @@
 		})
 
 		userName.value = res.data.nickname;
-		await getTodos();
+		getTodos();
 	});
 
 	const logOut = async () => {
@@ -108,11 +108,103 @@
 			
 			console.log(res)
 			todoToAdd.value.content = '';
-			await getTodos();
+			getTodos();
 		} catch (error) {
 			console.log(error.response.data.message)
 		}
 	}
+
+	const textToUpdate = ref(
+		{
+			content: ""
+		}
+	);
+
+	const editTodo = (todoId) => {
+		console.log(`edit: ${todoId}`)
+
+		todosAll.value.forEach(todo => delete todo.isEdit);
+
+		todosAll.value.filter(todo => {
+			if (todo.id === todoId) {
+				todo.isEdit = true;
+				textToUpdate.value.content = todo.content;
+			}
+		})
+	}
+
+	const updateTodo = async (todo) => {
+		if (textToUpdate.value.content === todo.content) {
+			console.log("變更後的內容與變更前相同，不做任何事");
+			cancelTodoChange();
+			return
+		}
+
+		try {
+			const res = await axios.put(
+				`${baseUrl.value}/todos/${todo.id}`,
+				textToUpdate.value,
+				{
+					headers: {
+						Authorization: todoToken
+					}
+				}
+			)
+
+			todo.content = textToUpdate.value.content; 
+			delete todo.isEdit;
+		} catch (error) {
+			console.log(error)
+
+			updateFailedMsg.value = [error.response.data.message].flat();
+			
+			new bootstrap.Modal(document.getElementById('loginErrorModal')).show();
+		}
+	}
+
+	const updateFailedMsg = ref("");
+
+	const cancelTodoChange = () => {
+		todosAll.value.forEach(todo => delete todo.isEdit);
+	}
+
+	const removeTodo = async (todoId) => {
+		console.log('delete: ' + todoId);
+
+		try {
+			const res = await axios.delete(`${baseUrl.value}/todos/${todoId}`, {
+				headers: {
+					Authorization: todoToken
+				}
+			})
+
+			console.log(res)
+
+			getTodos();
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	const toggleTodo = async (todoId) => {
+		try {
+			const res = await axios.patch(`${baseUrl.value}/todos/${todoId}/toggle`,{}, {
+				headers: {
+					Authorization: todoToken
+				}
+			})
+
+			console.log(res)
+
+			getTodos();
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	const todosDoneCount = computed(() => {
+		return todosAll.value.filter(todo => todo.status === true).length
+	})
 </script>
 
 <template>
@@ -142,43 +234,52 @@
 						<li><a href="#">待完成</a></li>
 						<li><a href="#">已完成</a></li>
 					</ul>
-					<!-- <div class="todoList_items">
-						<ul class="todoList_item">
-							<li v-for="todo in todosAll" :key="todo.id">
-								<label class="todoList_label">
-									<input class="todoList_input" type="checkbox" v-model="todo.status">
-									<span>{{ todo.content }}</span>
-								</label>
-								<a href="#">
-									<span class="material-symbols-outlined">
-										delete
-									</span>
-								</a>
-							</li>
-						</ul>
-						<div class="todoList_statistics">
-							<p> 5 個已完成項目</p>
-						</div>
-					</div> -->
 					<div class="todoList_items">
-						<ul class="todoList_item">
-							<li v-for="todo in todosAll" :key="todo.id">
+						<ul class="list-group list-group-flush">
+							<li class="list-group-item" v-for="todo in todosAll" :key="todo.id">
+								<a id="saveBtn" v-if="todo.isEdit" @click="updateTodo(todo)">
+									<span class="material-symbols-outlined">check</span>
+								</a>
+								<a id="editBtn" @click="editTodo(todo.id)" v-if="!todo.isEdit">
+									<span class="material-symbols-outlined">edit</span>
+								</a>
 								<label class="todoList_label">
-									<input class="todoList_input" type="checkbox" v-model="todo.status">
-									<span>{{ todo.content }}</span>
+									<input class="todoList_input" type="checkbox" v-model="todo.status" @click="toggleTodo(todo.id)" v-if="!todo.isEdit">
+									<span v-if="!todo.isEdit">{{ todo.content }}</span>
+									<input class="ms-3 w-100" type="text" v-if="todo.isEdit" v-model="textToUpdate.content">
 								</label>
-								<a href="#">
-									<!-- <i class="fa fa-times"></i> -->
-									<span class="material-symbols-outlined">
-										delete
-									</span>
+								<a id="cancelBtn" v-if="todo.isEdit" @click="cancelTodoChange">
+									<span class="material-symbols-outlined">close</span>
+								</a>
+								<a v-if="!todo.isEdit">
+									<span class="material-symbols-outlined" @click="removeTodo(todo.id)">delete</span>
 								</a>
 							</li>
 						</ul>
 						<div class="todoList_statistics">
-							<p> 5 個已完成項目</p>
+							<p> {{ todosDoneCount }} 個已完成項目</p>
 						</div>
 					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="loginErrorModal" tabindex="-1" aria-labelledby="loginErrorModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title fw-bold" id="loginErrorModalLabel">Oops!</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<ul class="text-danger m-1">
+						<li class="p-1" v-for="(msg, index) in updateFailedMsg" :key="index">{{ msg }}</li>
+					</ul>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 				</div>
 			</div>
 		</div>

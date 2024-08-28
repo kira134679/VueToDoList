@@ -33,7 +33,7 @@
 			const res = await axios.post(`${baseUrl.value}/users/sign_up`, signUpField.value);
 			console.log(`註冊成功! UID: ${res.data.uid}`);
 
-			router.push('/login');
+			router.push('/');
 		} catch (error) {
 			console.log(error)
 			/**
@@ -70,7 +70,7 @@
 					<!-- <label class="formControls_label" for="pwd">確認密碼</label> -->
 					<!-- <input class="formControls_input" type="password" name="confirmPwd" id="confirmPwd" placeholder="請再次輸入密碼" required v-model="signUpField.confirmPassword"> -->
 					<input class="formControls_btnSubmit" type="button" @click="signUp" value="註冊帳號" :disabled="isSignUpDisabled">
-					<RouterLink to="/login" class="formControls_btnLink">登入</RouterLink>
+					<RouterLink to="/" class="formControls_btnLink">登入</RouterLink>
 				</form>
 			</div>
 		</div>
