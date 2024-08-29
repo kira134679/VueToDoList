@@ -14,7 +14,6 @@
 			email: "",
   		nickname: "",
 			password: "",
-			// confirmPassword: ""
 		}
 	);
 
@@ -67,10 +66,8 @@
 					<label class="formControls_label" for="pwd">密碼</label>
 					<input class="formControls_input" type="password" name="pwd" id="pwd" placeholder="請輸入密碼" required v-model="signUpField.password">
 					<span v-if="signUpField.password === ''">此欄位不可留空</span>
-					<!-- <label class="formControls_label" for="pwd">確認密碼</label> -->
-					<!-- <input class="formControls_input" type="password" name="confirmPwd" id="confirmPwd" placeholder="請再次輸入密碼" required v-model="signUpField.confirmPassword"> -->
 					<input class="formControls_btnSubmit" type="button" @click="signUp" value="註冊帳號" :disabled="isSignUpDisabled">
-					<RouterLink to="/" class="formControls_btnLink">登入</RouterLink>
+					<RouterLink to="/login" class="formControls_btnLink">登入</RouterLink>
 				</form>
 			</div>
 		</div>

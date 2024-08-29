@@ -35,7 +35,7 @@
 			document.cookie = `todoToken=${res.data.token};`;
 			console.log("cookie saved.")
 
-			router.push('/todolist');
+			router.push('/');
 		} catch (error) {
 			console.log(error);
 

@@ -21,7 +21,7 @@
 	
 	onMounted(async () => {
 		if (todoToken === '') {
-			router.push('/');
+			router.push('/login');
 		}
 		
 		console.log(`token: ${todoToken}`)
@@ -44,12 +44,12 @@
 				}
 			})
 
-
+			// clear token in cookie
+			document.cookie = `todoToken=`;
+			router.push('/login');
 		} catch (error) {
-			
+			console.log(error)
 		}
-
-		router.push('/');
 	}
 
 	const userName = ref("");
@@ -205,6 +205,48 @@
 	const todosDoneCount = computed(() => {
 		return todosAll.value.filter(todo => todo.status === true).length
 	})
+
+	const tab = ref(0)
+
+	const enumCategory = Object.freeze(
+		{
+			All: 0,
+			Pending: 1,
+			Done: 2
+		}
+	)
+
+	const filteredTodos = computed(() => {
+		switch (tab.value) {
+			case enumCategory.All:
+				return todosAll.value
+				break;
+				
+			case enumCategory.Pending:
+				const pendingTodos = [];
+				todosAll.value.filter(todo => {
+					if (!todo.status) {
+						pendingTodos.push(todo);
+					}
+				})
+				return pendingTodos
+				break;
+
+			case enumCategory.Done:
+				const doneTodos = [];
+				todosAll.value.filter(todo => {
+					if (todo.status) {
+						doneTodos.push(todo);
+					}
+				})
+				return doneTodos
+				break;
+				
+			default:
+				return []
+				break;
+		}
+	})
 </script>
 
 <template>
@@ -230,14 +272,14 @@
 				</div>
 				<div class="todoList_list">
 					<ul class="todoList_tab">
-						<li><a href="#" class="active">全部</a></li>
-						<li><a href="#">待完成</a></li>
-						<li><a href="#">已完成</a></li>
+						<li><a :class="{'active': tab === enumCategory.All}" @click="tab = enumCategory.All">全部</a></li>
+						<li><a :class="{'active': tab === enumCategory.Pending}" @click="tab = enumCategory.Pending">待完成</a></li>
+						<li><a :class="{'active': tab === enumCategory.Done}" @click="tab = enumCategory.Done">已完成</a></li>
 					</ul>
 					<div class="todoList_items">
 						<ul class="list-group list-group-flush">
 							<div class="text-center m-2" v-if="todosAll.length === 0">目前尚無待辦事項</div>
-							<li class="list-group-item" v-for="todo in todosAll" :key="todo.id">
+							<li class="list-group-item" v-for="todo in filteredTodos" :key="todo.id">
 								<a id="saveBtn" v-if="todo.isEdit" @click="updateTodo(todo)">
 									<span class="material-symbols-outlined">check</span>
 								</a>
