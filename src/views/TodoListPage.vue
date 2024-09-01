@@ -1,7 +1,6 @@
 <script setup>
 	import { ref, onMounted, computed } from 'vue'
 	import { useBaseUrlStore } from '@/stores/api'
-	import { useTodosStore } from '@/stores/todos'
 	import { storeToRefs } from 'pinia'
 	import axios from 'axios'
 	import { useRouter } from 'vue-router'
@@ -9,10 +8,6 @@
 	const baseUrlStore = useBaseUrlStore();
 	const { baseUrl } = storeToRefs(baseUrlStore);
 	const router = useRouter();
-
-	const todosStore = useTodosStore();
-	const { todosAll } = storeToRefs(todosStore);
-	const { getTodos } = todosStore;
 
 	const todoToken = document.cookie.replace(
 		/(?:(?:^|.*;\s*)todoToken\s*\=\s*([^;]*).*$)|^.*$/,
@@ -24,8 +19,6 @@
 			router.push('/login');
 		}
 		
-		console.log(`token: ${todoToken}`)
-
 		const res = await axios.get(`${baseUrl.value}/users/checkout`, {
 			headers: {
 				Authorization: todoToken
@@ -38,7 +31,7 @@
 
 	const logOut = async () => {
 		try {
-			const res = await axios.post(`${baseUrl.value}/users/sign_out`, {}, {
+			const res = await axios.post(`${baseUrl.value}/users/sign_out`,{}, {
 				headers: {
 					Authorization: todoToken
 				}
@@ -48,46 +41,33 @@
 			document.cookie = `todoToken=`;
 			router.push('/login');
 		} catch (error) {
-			console.log(error)
+			todoPageErrorMsg.value = [error.response.data.message].flat();
+			new bootstrap.Modal(document.getElementById('todoErrorModal')).show();
 		}
 	}
 
 	const userName = ref("");
+	const todosAll = ref([]);
 
-	// const todosAll = ref(
-	// 	[
-	// 		{
-	// 			id: 1,
-	// 			isDone: false,
-	// 			summary: "把冰箱發霉的檸檬拿去丟"
-	// 		},
-	// 		{
-	// 			id: 2,
-	// 			isDone: false,
-	// 			summary: "打電話叫媽媽匯款給我"
-	// 		},
-	// 		{
-	// 			id: 3,
-	// 			isDone: false,
-	// 			summary: "整理電腦資料夾"
-	// 		},
-	// 		{
-	// 			id: 4,
-	// 			isDone: false,
-	// 			summary: "繳電費水費瓦斯費"
-	// 		},
-	// 		{
-	// 			id: 5,
-	// 			isDone: true,
-	// 			summary: "約vicky禮拜三泡溫泉"
-	// 		},
-	// 		{
-	// 			id: 6,
-	// 			isDone: false,
-	// 			summary: "約ada禮拜四吃晚餐"
-	// 		}
-	// 	]
-	// );
+	const getTodos = async () => {
+		try {
+			const todoToken = document.cookie.replace(
+				/(?:(?:^|.*;\s*)todoToken\s*\=\s*([^;]*).*$)|^.*$/,
+				"$1"
+			)
+	
+			const res = await axios.get(`${baseUrl.value}/todos/`, {
+				headers: {
+					Authorization: todoToken
+				}
+			});
+			console.log(res)
+			todosAll.value = [...res.data.data];
+		} catch (error) {
+			todoPageErrorMsg.value = [error.response.data.message].flat();
+			new bootstrap.Modal(document.getElementById('todoErrorModal')).show();
+		}
+	}
 
 	const todoToAdd = ref(
 		{
@@ -110,7 +90,8 @@
 			todoToAdd.value.content = '';
 			getTodos();
 		} catch (error) {
-			console.log(error.response.data.message)
+			todoPageErrorMsg.value = [error.response.data.message].flat();
+			new bootstrap.Modal(document.getElementById('todoErrorModal')).show();
 		}
 	}
 
@@ -154,15 +135,12 @@
 			todo.content = textToUpdate.value.content; 
 			delete todo.isEdit;
 		} catch (error) {
-			console.log(error)
-
-			updateFailedMsg.value = [error.response.data.message].flat();
-			
-			new bootstrap.Modal(document.getElementById('loginErrorModal')).show();
+			todoPageErrorMsg.value = [error.response.data.message].flat();
+			new bootstrap.Modal(document.getElementById('todoErrorModal')).show();
 		}
 	}
 
-	const updateFailedMsg = ref("");
+	const todoPageErrorMsg = ref("");
 
 	const cancelTodoChange = () => {
 		todosAll.value.forEach(todo => delete todo.isEdit);
@@ -182,7 +160,8 @@
 
 			getTodos();
 		} catch (error) {
-			console.log(error)
+			todoPageErrorMsg.value = [error.response.data.message].flat();
+			new bootstrap.Modal(document.getElementById('todoErrorModal')).show();
 		}
 	}
 
@@ -198,12 +177,13 @@
 
 			getTodos();
 		} catch (error) {
-			console.log(error)
+			todoPageErrorMsg.value = [error.response.data.message].flat();
+			new bootstrap.Modal(document.getElementById('todoErrorModal')).show();
 		}
 	}
 
-	const todosDoneCount = computed(() => {
-		return todosAll.value.filter(todo => todo.status === true).length
+	const todosPendingCount = computed(() => {
+		return todosAll.value.filter(todo => todo.status === false).length
 	})
 
 	const tab = ref(0)
@@ -220,7 +200,6 @@
 		switch (tab.value) {
 			case enumCategory.All:
 				return todosAll.value
-				break;
 				
 			case enumCategory.Pending:
 				const pendingTodos = [];
@@ -230,7 +209,6 @@
 					}
 				})
 				return pendingTodos
-				break;
 
 			case enumCategory.Done:
 				const doneTodos = [];
@@ -240,11 +218,9 @@
 					}
 				})
 				return doneTodos
-				break;
 				
 			default:
 				return []
-				break;
 		}
 	})
 </script>
@@ -278,7 +254,7 @@
 					</ul>
 					<div class="todoList_items">
 						<ul class="list-group list-group-flush">
-							<div class="text-center m-2" v-if="todosAll.length === 0">目前尚無待辦事項</div>
+							<div class="text-center m-2" v-if="filteredTodos.length === 0">目前尚無待辦事項</div>
 							<li class="list-group-item" v-for="todo in filteredTodos" :key="todo.id">
 								<a id="saveBtn" v-if="todo.isEdit" @click="updateTodo(todo)">
 									<span class="material-symbols-outlined">check</span>
@@ -300,7 +276,7 @@
 							</li>
 						</ul>
 						<div class="todoList_statistics">
-							<p> {{ todosDoneCount }} 個已完成項目</p>
+							<p> {{ todosPendingCount }} 個待完成項目</p>
 						</div>
 					</div>
 				</div>
@@ -309,16 +285,16 @@
 	</div>
 
 	<!-- Modal -->
-	<div class="modal fade" id="loginErrorModal" tabindex="-1" aria-labelledby="loginErrorModalLabel" aria-hidden="true">
+	<div class="modal fade" id="todoErrorModal" tabindex="-1" aria-labelledby="todoErrorModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title fw-bold" id="loginErrorModalLabel">Oops!</h5>
+					<h5 class="modal-title fw-bold" id="todoErrorModalLabel">Oops!</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
 					<ul class="text-danger m-1">
-						<li class="p-1" v-for="(msg, index) in updateFailedMsg" :key="index">{{ msg }}</li>
+						<li class="p-1" v-for="(msg, index) in todoPageErrorMsg" :key="index">{{ msg }}</li>
 					</ul>
 				</div>
 				<div class="modal-footer">
