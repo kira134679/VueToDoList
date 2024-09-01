@@ -32,7 +32,8 @@
 			const res = await axios.post(`${baseUrl.value}/users/sign_up`, signUpField.value);
 			console.log(`註冊成功! UID: ${res.data.uid}`);
 
-			router.push('/');
+			alert(`註冊成功! 將跳轉至登入頁面。`)
+			router.push('/login');
 		} catch (error) {
 			console.log(error)
 			/**
@@ -40,7 +41,6 @@
 			 * 為了統一解法，先都加進陣列再用flat降為一維陣列，使join可正常運作。
 			 */
 			signUpErrorMsg.value = [error.response.data.message].flat();
-			
 			new bootstrap.Modal(document.getElementById('signUpErrorModal')).show();
 		}
 	}
