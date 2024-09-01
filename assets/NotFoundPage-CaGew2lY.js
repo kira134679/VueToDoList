@@ -1,0 +1,1 @@
+import{a as s,b as r,d as a}from"./index-DOuLBMa8.js";const _=(e,t)=>{const o=e.__vccOpts||e;for(const[n,c]of t)o[n]=c;return o},d={},f={class:"conatiner vhContainer d-flex justify-content-center align-items-center"},i=a("h1",{class:"fw-bolder fs-40px"},"404 Page not found.",-1),l=[i];function u(e,t){return s(),r("div",f,l)}const p=_(d,[["render",u]]);export{p as default};
